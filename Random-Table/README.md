@@ -1,4 +1,4 @@
 # Link is there
 
 
-https://repl.it/@O1egP/InterestingStrongLanserver
+https://InterestingStrongLanserver--o1egp.repl.co
