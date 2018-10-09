@@ -6,7 +6,7 @@ import {createStore, combineReducers} from 'redux';
 import {Provider, connect}   from 'react-redux';
 import Img from 'react-image';
 const API = 'http://api.tvmaze.com/search/shows?q=girls';
-const thValue = new Set(['name', 'language', 'genres', 'status','raiting']);
+const thValue = new Set(['name', 'language', 'genres', 'status','rating']);
 let page = '';
 
 function reducer(state, action){
@@ -174,8 +174,11 @@ class MakeTr extends Component{
         let arr = [];
         for(let key in this.props.columns){
             if(thValue.has(key)){
-
-                arr.push(this.props.columns[key]);
+                if(key === 'rating'){
+                    arr.push(this.props.columns['rating']['average']);
+                } else{
+                    arr.push(this.props.columns[key]);
+                }
             }
         }
         return arr;
@@ -184,6 +187,7 @@ class MakeTr extends Component{
     newValueTr(){
         return this.createNewArr().map(el=> <MakeTd name = {el} />);
     }
+    
 
 
     render()
@@ -197,7 +201,7 @@ class MakeTr extends Component{
             
         );
     }
-}    
+} 
 
 class MakeTable extends Component{
 
