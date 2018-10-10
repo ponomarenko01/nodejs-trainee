@@ -2,70 +2,91 @@ import React, {Component} from 'react';
 import './App.css';
 import createHistory from 'history/createBrowserHistory';
 import {Router, Route, Link, Switch} from 'react-router-dom';
-import {createStore, combineReducers} from 'redux';
 import {Provider, connect}   from 'react-redux';
+import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import Img from 'react-image';
-const API = 'http://api.tvmaze.com/search/shows?q=girls';
+import thunk from 'redux-thunk';
+const API = 'http://api.tvmaze.com/search/shows?q=';
 const KeyNames = new Set(['name', 'language', 'genres', 'status','rating']);
+const actionPending     = () => ({ type: 'DATA_USER', status: 'PENDING', payload: null, error: null });
+const actionResolved    = payload => ({ type: 'DATA_USER', status: 'RESOLVED', payload, error: null });
+const actionRejected    = error => ({ type: 'DATA_USER', status: 'REJECTED', payload: null, error });
 let page = '';
 
-function reducer(state, action){
+function reducer(state = {arr:[]}, action){
     if (state === undefined){
         return page;
     }
 
     else if (action.type === 'DATA_USER'){
-        console.log(action.data);
-        return action.data.user;
+        // console.log(action.data);
+        return {...state , arr:action.payload};
     }
     return state;
 }
 
-
-
-class HomeApp extends React.Component {
-
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            news: [],
-            isLoading: false,
-            error: null,
-        };
-    }
-
-    componentDidMount() {
-        this.setState({ isLoading: true });
-
-        fetch(API)
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Something went wrong ...');
-                }
-            })
-            .then(data => this.setState({ news: data, isLoading: false }))
-            .catch(error => this.setState({ error, isLoading: false }));
-    }
-
-    render() {
-        const { news, isLoading, error } = this.state;
-
-        if (error) {
-            return <p>{error.message}</p>;
+function actionTable(inputValue = 'girls'){
+    return async (dispatch) => {
+        dispatch(actionPending());
+        try{
+            dispatch(actionResolved(await fetch(API+inputValue)
+                .then((response) => response.json())));
         }
-
-        if (isLoading) {
-            return <p>Loading ...</p>;
+        catch (e) {
+            dispatch(actionRejected(e));
         }
-
-        return (
-            <MakeTable data = {news}/> 
-        );
-    }
+    }; 
 }
+
+function action(sortedArr){
+  return async (dispatch) => {
+      dispatch(actionResolved(sortedArr))
+  }; 
+}
+// class HomeApp extends React.Component {
+
+//     constructor(props) {
+//         super(props);
+
+//         this.state = {
+//             news: [],
+//             isLoading: false,
+//             error: null,
+//         };
+//     }
+
+//     componentDidMount() {
+//         this.setState({ isLoading: true });
+
+//         fetch(API)
+//             .then(response => {
+//                 if (response.ok) {
+//                     return response.json();
+//                 } else {
+//                     throw new Error('Something went wrong ...');
+//                 }
+//             })
+//             .then(data => this.setState({ news: data, isLoading: false }))
+//             .catch(error => this.setState({ error, isLoading: false }));
+//     }
+
+//     render() {
+//         const { news, isLoading, error } = this.state;
+
+//         if (error) {
+//             return <p>{error.message}</p>;
+//         }
+
+//         if (isLoading) {
+//             return <p>Loading ...</p>;
+//         }
+
+//         return (
+//             <MakeTable data = {news}/> 
+//         );
+//     }
+// }
 
 
 
@@ -104,7 +125,8 @@ class Home extends Component {
         return (
             <div className=" App-header App SectionApp">
                 <h1>Home Page</h1><br /><br />
-                <HomeApp /><br /><br />
+                <UserSearch /><br /><br />
+                <MakeTable /><br /><br />
                 <Link to='/login' className='WhiteLink'>User info</Link>
             </div>
         );
@@ -148,13 +170,10 @@ class ErrPage extends Component {
 }
 
 class MakeTd extends Component{
-    constructor(props){
-        super(props);
-    }
 
     render(){
         return(
-            <td>
+            <td onClick={() => this.props}>
                 {
                     this.props.name
                 }
@@ -175,7 +194,7 @@ class MakeTr extends Component{
         for(let key in this.props.columns){
             if(KeyNames.has(key)){
                 if(key === 'rating'){
-                    arr.push(this.props.columns['rating']['average']);
+                    arr.push(this.props.columns['rating']['average'] || '0');
                 } else{
                     arr.push(this.props.columns[key]);
                 }
@@ -203,13 +222,39 @@ class MakeTr extends Component{
 } 
 
 class MakeTable extends Component{
+    componentWillMount(){
+        this.props.actionTable();
+        // console.log(this.props);
 
+    }
     chooseCol(){
-        return this.props.data.map((row, i)=> <MakeTr key={i} columns = {row.show } index ={i} />);
+        if (this.props.page !== null && this.props.page !== false) {
+            return this.props.page.map((row, i)=> <MakeTr key={i} columns = {row.show } index ={i} />);
+        }
     }
 
     createTh(){
-        return Array.from(KeyNames).map((value, i)=> <th key = {i}>{value.toUpperCase()}</th>);
+        return Array.from(KeyNames).map((value, i, arr)=> <th onClick={() =>{
+            if(value === 'name'){
+                console.log('name');
+                console.log(arr);
+                this.props.page.sort(function (a, b) {
+                    if (a.show.name > b.show.name) {
+                        return 1;
+                    }
+                    if (a.show.name < b.show.name) {
+                        return -1;
+                    }
+                    else {
+                        return 0;
+                    }
+                });
+            } 
+            this.props.action(this.props.page); // запись отсортированного массива в стор(осталось перезапустить table с отсортированным массивом)
+            if(value === 'rating'){
+                console.log('rating');
+            }
+        }} key = {i}>{value.toUpperCase()}</th>);
     }
 
     render()
@@ -232,18 +277,31 @@ class MakeTable extends Component{
     }
 }
 
-var store = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
+class UserSearch extends Component{
 
+    render(){
+        return(
+            <div>
+                <input ref={c => this.input = c} />
+                <button onClick={() => this.props.actionTable(this.input.value)}>Search</button>
+            </div>
+        );
+    }
+} 
 
+var store = createStore(reducer, composeWithDevTools(applyMiddleware(thunk)));
+store.subscribe(() => console.log(store.getState()));
 
 const mapStateToProps = function(store) {
     return {
-        page: store.page,
+        page: store.arr
     };
 };
 
-Home = connect(mapStateToProps)(Home);
-Login = connect(mapStateToProps)(Login);
+MakeTable = connect(mapStateToProps,{actionTable, action})(MakeTable);
+UserSearch = connect(mapStateToProps,{actionTable})(UserSearch);
+// Home = connect(mapStateToProps)(Home);
+// Login = connect(mapStateToProps)(Login);
 
 class App extends Component {
     render() {

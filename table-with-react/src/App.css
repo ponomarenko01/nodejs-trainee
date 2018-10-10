@@ -75,6 +75,10 @@ td{
   text-align: center;
 }
 
+input{
+  width: 50%;
+}
+
 .infoBlock{
   margin-bottom: 30px;
   align-items: center;

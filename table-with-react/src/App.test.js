@@ -10,6 +10,17 @@ it('renders without crashing', () => {
 
 
 
+// function actionTable(){
+//   return async (dispatch) => {
+//       dispatch(actionPending());
+//       try{
+//           dispatch(actionResolved(await fetch(API).then((response) => response.json())));
+//       }
+//       catch (e) {
+//           dispatch(actionRejected(e));
+//       }
+//   ; 
+// }
 
 // const myComponent = () => <Img src="www.example.com/foo.jpg" />
 
