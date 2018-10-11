@@ -79,6 +79,11 @@ input{
   width: 50%;
 }
 
+.TdLink{
+  text-decoration: none;
+  color: white;
+}
+
 .infoBlock{
   margin-bottom: 30px;
   align-items: center;

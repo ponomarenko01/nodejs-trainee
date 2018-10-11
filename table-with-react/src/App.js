@@ -40,67 +40,16 @@ function actionTable(inputValue = 'girls'){
 }
 
 function action(sortedArr){
-  return async (dispatch) => {
-      dispatch(actionResolved(sortedArr))
-  }; 
+    return async (dispatch) => {
+        dispatch(actionResolved(sortedArr))
+    }; 
 }
-// class HomeApp extends React.Component {
 
-//     constructor(props) {
-//         super(props);
-
-//         this.state = {
-//             news: [],
-//             isLoading: false,
-//             error: null,
-//         };
-//     }
-
-//     componentDidMount() {
-//         this.setState({ isLoading: true });
-
-//         fetch(API)
-//             .then(response => {
-//                 if (response.ok) {
-//                     return response.json();
-//                 } else {
-//                     throw new Error('Something went wrong ...');
-//                 }
-//             })
-//             .then(data => this.setState({ news: data, isLoading: false }))
-//             .catch(error => this.setState({ error, isLoading: false }));
-//     }
-
-//     render() {
-//         const { news, isLoading, error } = this.state;
-
-//         if (error) {
-//             return <p>{error.message}</p>;
-//         }
-
-//         if (isLoading) {
-//             return <p>Loading ...</p>;
-//         }
-
-//         return (
-//             <MakeTable data = {news}/> 
-//         );
-//     }
-// }
 
 
 
 class Login extends Component {
 
-    addUser() {
-
-        
-        this.login.value = '';
-        this.mail.value = '';
-        this.password.value = '';
-    }
-
-  
 
     render() {
         return (
@@ -111,7 +60,27 @@ class Login extends Component {
                 <input className="InputSpace" placeholder='Type your password'  type="text" ref={(input) => { this.password = input; }} /><br /><br />
                 <button >Add user</button><br /><br />
                 <Link to='/' className='WhiteLink'>Home</Link>&nbsp;&nbsp;
-                <Link to='/detail' className='WhiteLink'>Detail</Link>
+                <Link to='/registration' className='WhiteLink'>Registration</Link>
+            </div>
+    
+        );
+    }
+}
+
+class Registration extends Component {
+
+    render() {
+        return (
+   
+            <div className=" App-header App SectionApp">
+                <h1>Login please!</h1><br /><br />
+                <input className="InputSpace" placeholder='Type your name'  type="text" ref={(input) => { this.name = input; }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your login'  type="text" ref={(input) => { this.login = input; }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your mail'  type="text" ref={(input) => { this.mail = input; }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your password'  type="text" ref={(input) => { this.password = input; }} /><br /><br />
+                <button >Add user</button><br /><br />
+                <Link to='/' className='WhiteLink'>Home</Link>&nbsp;&nbsp;
+                
 
             </div>
     
@@ -134,16 +103,21 @@ class Home extends Component {
 }
 
 class Detail extends Component {
-
+    // funcDetail(){
+    //   for(key in arr)
+    // }
     render (){
         return (
             <div className=" App-header App SectionApp">
+            
                 <h1>User info</h1><br /><br />
                 <section className=''>
                     <div className='forBlocks block1'>
                         <Img src="https://html.com/wp-content/plugins/htmlcodetutorial-plugin/assets/images/chrome-true.png" />
                     </div>
                     <div className='forBlocks block2'>
+                        {console.log(this.props.match.params.id)}
+                        <h3>{this.props.match.params.id}</h3>
                         <span className='forSpan'>Name</span><br /><br />
                         <span className='forSpan'>Language</span><br /><br />
                         <span className='forSpan'>Genres</span><br /><br />
@@ -170,13 +144,17 @@ class ErrPage extends Component {
 }
 
 class MakeTd extends Component{
-
+    details(){
+        console.log('click td');
+    }
     render(){
         return(
-            <td onClick={() => this.props}>
-                {
-                    this.props.name
-                }
+            <td key = {this.props.index} onClick={() => this.details()}>
+                <Link className='TdLink' to ={`/detail/${this.props.index}`} >
+                    {
+                        this.props.name
+                    }
+                </Link>
             </td>
         );
     }
@@ -204,7 +182,7 @@ class MakeTr extends Component{
     }
 
     newValueTr(){
-        return this.createNewArr().map(el=> <MakeTd name = {el} />);
+        return this.createNewArr().map((el)=> <MakeTd name = {el} index = {this.props.columns} />);
     }
     
 
@@ -312,7 +290,8 @@ class App extends Component {
                         <Switch>
                             <Route exact path='/' component={Home}/>
                             <Route path='/login' component={Login}/>
-                            <Route path='/detail' component={Detail}/>
+                            <Route path='/registration' component={Registration}/>
+                            <Route path='/detail/:id' component={Detail}/>
                             <Route component={ErrPage}/>
                         </Switch>
                     </div>
