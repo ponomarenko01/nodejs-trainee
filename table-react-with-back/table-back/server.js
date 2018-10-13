@@ -8,7 +8,7 @@ var sequelize = new Sequelize('table1', 'root', 'root',
             min: 0,
             idle: 10000
         },
-        logging: true 
+        logging: false
         //false
         //true 
     }
@@ -47,8 +47,8 @@ Table.beforeCreate(function(model, options) {
 User.hasMany(Table)
 Table.belongsTo(User)
 
-fillDB()
-sequelize.sync()
+// fillDB()
+// sequelize.sync()
 
 async function fillDB(){
     await sequelize.sync()
@@ -96,9 +96,6 @@ async function fillDB(){
     user2.addTable(tableUs2)
 }
 
-//  sequelize.sync()
-// fillDB()
-
 
 var express = require('express');
 const cors  = require('cors')
@@ -142,7 +139,7 @@ var schema = buildSchema(`
     type Mutation {
         createUser(login: String!, mail: String!, password: String!, firstName: String!, lastName: String!, dateOfBirth: String!, phoneNumber: String!): User
         createTable(userId: Int!, name: String!, language: String!, genres: String!, status: String!, rating: String!): Table
-        updateUser(userId: Int!, mail: String!): User
+        updateUser(userId: Int!, mail: String!, login: String!, firstName: String!, lastName: String!, password: String!, dateOfBirth: String!, phoneNumber: String!): User
         updateTable(tableId: String!, userId: Int!, name: String!): Table
     }
     
@@ -180,10 +177,22 @@ console.log("success");
 async function updateUser(args){
     console.log(args);
     let id = args.userId
+    let firstName = args.firstName
+    let lastName = args.lastName
+    let login = args.login
     let mail = args.mail
+    let password = args.password
+    let dateOfBirth = args.dateOfBirth
+    let phoneNumber = args.phoneNumber
     var user = await User.findById(id)
     if (user){
+        user.update({firstName})
+        user.update({lastName})
         user.update({mail})
+        user.update({login})
+        user.update({password})
+        user.update({dateOfBirth})
+        user.update({phoneNumber})
 console.log("success");
     }
     else{
@@ -192,9 +201,36 @@ console.log("success");
     return user;
 }
 
+// async function getUser(args){
+//     console.log(args);
+//     let id = args.userId
+//     let login = args.login
+//     let password = args.password
+//     var user = await User.findById(id)
+//     if (login && password){
+//         console.log("success");
+//         console.log(args);
+//     }
+//     else{
+//        console.log("error");
+//     }
+//     return user;
+// }
+
+// function getUser(args){
+//     let id = args.id
+//     let user = User.findById(id)
+//     if (user){
+//         console.log("success");
+//     }
+//     else{
+//        console.log("error");
+//     }
+//     return user;
+// }
+
 function getUser(args){
     let id = args.id
-    // console.log(args)
     return User.findById(id)
 }
 

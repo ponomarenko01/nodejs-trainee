@@ -7,6 +7,9 @@ import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import Img from 'react-image';
 import thunk from 'redux-thunk';
+import { GraphQLClient } from 'graphql-request';
+
+const gql = new GraphQLClient('http://localhost:4000/graphql', { headers: {} });
 const API = 'http://api.tvmaze.com/search/shows?q=';
 const KeyNames = new Set(['name', 'language', 'genres', 'status','rating']);
 const actionPending     = () => ({ type: 'DATA_USER', status: 'PENDING', payload: null, error: null });
@@ -22,6 +25,10 @@ function reducer(state = {arr:[]}, action){
     else if (action.type === 'DATA_USER'){
         // console.log(action.data);
         return {...state , arr:action.payload};
+    }
+    else if (action.type === 'ADD_USER'){
+        console.log(action.data);
+        return action.data.user;
     }
     return state;
 }
@@ -69,24 +76,66 @@ class Login extends Component {
 
 class Registration extends Component {
 
+    addUser() {
+
+        gql.request(
+            `mutation createUser($login: String!, $mail:String!, $password: String!, 
+                $firstName: String!, $lastName: String!, 
+                $dateOfBirth: String!, $phoneNumber: String!) {
+                createUser(login: $login, mail: $mail, password: $password, 
+                    firstName: $firstName, lastName: $lastName, 
+                    dateOfBirth: $dateOfBirth, phoneNumber: $phoneNumber) {
+                        login
+                        mail
+                        password
+                         firstName
+                         lastName
+                         phoneNumber
+                         dateOfBirth
+                }
+            }`,
+            {login: this.login.value,
+                mail: this.mail.value,
+                password: this.password.value,
+                firstName: this.firstName.value,
+                lastName: this.lastName.value,
+                dateOfBirth: this.dateOfBirth.value,
+                phoneNumber: this.phoneNumber.value}
+        )
+            .then(data => store.dispatch({type: 'ADD_USER', data: {user:data.createUser}}));
+
+        this.login.value = '';
+        this.mail.value = '';
+        this.password.value = '';
+        this.firstName.value = '';
+        this.lastName.value = '';
+        this.dateOfBirth.value = '';
+        this.phoneNumber.value = '';
+    }
+
+            
+
     render() {
         return (
-   
-            <div className=" App-header App SectionApp">
-                <h1>Login please!</h1><br /><br />
-                <input className="InputSpace" placeholder='Type your name'  type="text" ref={(input) => { this.name = input; }} /><br /><br />
-                <input className="InputSpace" placeholder='Type your login'  type="text" ref={(input) => { this.login = input; }} /><br /><br />
-                <input className="InputSpace" placeholder='Type your mail'  type="text" ref={(input) => { this.mail = input; }} /><br /><br />
-                <input className="InputSpace" placeholder='Type your password'  type="text" ref={(input) => { this.password = input; }} /><br /><br />
-                <button >Add user</button><br /><br />
-                <Link to='/' className='WhiteLink'>Home</Link>&nbsp;&nbsp;
-                
 
+            <div className=" App-header App SectionApp">
+                <h1>Create User</h1><br /><br />
+                <input className="InputSpace" placeholder='Type your login'  type="text" ref={(input) => { this.login = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your mail'  type="text" ref={(input) => { this.mail = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your firstName'  type="text" ref={(input) => { this.firstName = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your lastName'  type="text" ref={(input) => { this.lastName = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your password'  type="text" ref={(input) => { this.password = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your dateOfBirth'  type="text" ref={(input) => { this.dateOfBirth = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your phoneNumber'  type="text" ref={(input) => { this.phoneNumber = input }} /><br /><br />
+                <button onClick={this.addUser.bind(this)}>Add user</button><br /><br />
+                <Link to='/' className='WhiteLink'>Home</Link>&nbsp;&nbsp;
             </div>
-    
+            
         );
     }
 }
+
+
 
 class Home extends Component {
 
