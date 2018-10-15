@@ -27,11 +27,16 @@ function reducer(state = {arr:[]}, action){
         return {...state , arr:action.payload};
     }
     else if (action.type === 'ADD_USER'){
-        console.log(action.data);
+        // console.log(action.data);
         return action.data.user;
     }
+
     return state;
 }
+
+// function loginReducer(state, action){
+
+// }
 
 function actionTable(inputValue = 'girls'){
     return async (dispatch) => {
@@ -57,15 +62,37 @@ function action(sortedArr){
 
 class Login extends Component {
 
+    loginUser(){
 
+        gql.request(
+            `query getUser ($login: String!, $password: String!) {
+                user (login: $login, password: $password) {
+                login
+                password
+                }
+                
+            }`,
+            {  
+                login: this.login.value,
+                password: this.password.value}
+        )
+            .then(data => {
+                console.log(data.user);
+                return store.dispatch({type: 'ADD_USER', data: {user:data.getUser}});
+            });
+        // console.log();
+        this.login.value = '';
+        this.password.value = '';
+    }
     render() {
         return (
    
             <div className=" App-header App SectionApp">
                 <h1>Login please!</h1><br /><br />
-                <input className="InputSpace" placeholder='Type your mail'  type="text" ref={(input) => { this.mail = input; }} /><br /><br />
+                {/* <input className="InputSpace" placeholder='Type your id'  type="text" ref={(input) => { this.id = input; }} /><br /><br /> */}
+                <input className="InputSpace" placeholder='Type your login'  type="text" ref={(input) => { this.login = input; }} /><br /><br />
                 <input className="InputSpace" placeholder='Type your password'  type="text" ref={(input) => { this.password = input; }} /><br /><br />
-                <button >Add user</button><br /><br />
+                <button onClick={this.loginUser.bind(this)}>Login user</button><br /><br />
                 <Link to='/' className='WhiteLink'>Home</Link>&nbsp;&nbsp;
                 <Link to='/registration' className='WhiteLink'>Registration</Link>
             </div>
@@ -222,7 +249,7 @@ class MakeTr extends Component{
             if(KeyNames.has(key)){
                 if(key === 'rating'){
                     arr.push(this.props.columns['rating']['average'] || '0');
-                } else{
+                } else {
                     arr.push(this.props.columns[key]);
                 }
             }
@@ -231,7 +258,7 @@ class MakeTr extends Component{
     }
 
     newValueTr(){
-        return this.createNewArr().map((el)=> <MakeTd name = {el} index = {this.props.columns} />);
+        return this.createNewArr().map((el)=> <MakeTd name = {el} index = {this.props.index} />);
     }
     
 

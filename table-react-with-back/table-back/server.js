@@ -106,12 +106,12 @@ var { buildSchema } = require('graphql');
 var schema = buildSchema(`
     type Query {
         table(id: String!, userId: Int!): Table
-        user(id: Int!): User
+        user(login: String!, password: String!): User
         users: [User]
     }
 
     type User {
-        id: Int
+        
         firstName: String
         lastName: String
         login: String
@@ -201,15 +201,37 @@ console.log("success");
     return user;
 }
 
-// async function getUser(args){
-//     console.log(args);
-//     let id = args.userId
-//     let login = args.login
-//     let password = args.password
-//     var user = await User.findById(id)
-//     if (login && password){
+async function getUser(args){
+    console.log('args ',args);
+    // let id = args.id
+    let login = args.login
+    let password = args.password
+    // console.log('id', id);
+    // var user = await User.findById(id)
+    var user = await User.findOne({
+        where: {
+            login: login
+        }
+    })
+    if (login === user.login && password === user.password){
+        console.log("success");
+        // console.log('user => ',user);
+        console.log('ul',user.login);
+    }
+    else{
+        console.log('log',login);
+        console.log('pas',password, ' !== ', user.password);
+       console.log("error");
+    }
+    return user;
+}
+
+// function getUser(args){
+//     let id = args.id
+//     let user = User.findById(id)
+//     if (user){
 //         console.log("success");
-//         console.log(args);
+//         console.log(user);
 //     }
 //     else{
 //        console.log("error");
@@ -219,20 +241,8 @@ console.log("success");
 
 // function getUser(args){
 //     let id = args.id
-//     let user = User.findById(id)
-//     if (user){
-//         console.log("success");
-//     }
-//     else{
-//        console.log("error");
-//     }
-//     return user;
+//     return User.findById(id)
 // }
-
-function getUser(args){
-    let id = args.id
-    return User.findById(id)
-}
 
 
 async function createUser({login, mail, password, firstName, lastName, dateOfBirth, phoneNumber}){
