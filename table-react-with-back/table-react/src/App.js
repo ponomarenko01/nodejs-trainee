@@ -8,30 +8,21 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import Img from 'react-image';
 import thunk from 'redux-thunk';
 import { GraphQLClient } from 'graphql-request';
-
+import { actionPending, actionResolved, actionRejected, API, KeyNames, ADD_USER, DATA_USER } from 'constants/NewEvent.js';
 const gql = new GraphQLClient('http://localhost:4000/graphql', { headers: {} });
-const API = 'http://api.tvmaze.com/search/shows?q=';
-const KeyNames = new Set(['name', 'language', 'genres', 'status','rating']);
-const actionPending     = () => ({ type: 'DATA_USER', status: 'PENDING', payload: null, error: null });
-const actionResolved    = payload => ({ type: 'DATA_USER', status: 'RESOLVED', payload, error: null });
-const actionRejected    = error => ({ type: 'DATA_USER', status: 'REJECTED', payload: null, error });
-let page = '';
+let page ;
 
 function reducer(state = {arr:[]}, action){
-    if (state === undefined){
-        return page;
-    }
-
-    else if (action.type === 'DATA_USER'){
-        // console.log(action.data);
+    switch (action.type) {
+    case DATA_USER: 
         return {...state , arr:action.payload};
-    }
-    else if (action.type === 'ADD_USER'){
-        // console.log(action.data);
+    
+    case ADD_USER:
         return action.data.user;
+    
+    default:
+        return state;
     }
-
-    return state;
 }
 
 // function loginReducer(state, action){
@@ -53,7 +44,7 @@ function actionTable(inputValue = 'girls'){
 
 function action(sortedArr){
     return async (dispatch) => {
-        dispatch(actionResolved(sortedArr))
+        dispatch(actionResolved(sortedArr));
     }; 
 }
 
@@ -89,9 +80,8 @@ class Login extends Component {
    
             <div className=" App-header App SectionApp">
                 <h1>Login please!</h1><br /><br />
-                {/* <input className="InputSpace" placeholder='Type your id'  type="text" ref={(input) => { this.id = input; }} /><br /><br /> */}
                 <input className="InputSpace" placeholder='Type your login'  type="text" ref={(input) => { this.login = input; }} /><br /><br />
-                <input className="InputSpace" placeholder='Type your password'  type="text" ref={(input) => { this.password = input; }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your password' type="password" name="password"  ref={(input) => { this.password = input; }} /><br /><br />
                 <button onClick={this.loginUser.bind(this)}>Login user</button><br /><br />
                 <Link to='/' className='WhiteLink'>Home</Link>&nbsp;&nbsp;
                 <Link to='/registration' className='WhiteLink'>Registration</Link>
@@ -155,6 +145,64 @@ class Registration extends Component {
                 <input className="InputSpace" placeholder='Type your dateOfBirth'  type="text" ref={(input) => { this.dateOfBirth = input }} /><br /><br />
                 <input className="InputSpace" placeholder='Type your phoneNumber'  type="text" ref={(input) => { this.phoneNumber = input }} /><br /><br />
                 <button onClick={this.addUser.bind(this)}>Add user</button><br /><br />
+                <Link to='/' className='WhiteLink'>Home</Link>&nbsp;&nbsp;
+            </div>
+            
+        );
+    }
+}
+
+class Profile extends Component {
+
+    updateUser() {
+
+        gql.request(
+            `mutation updateUser($mail: String!, $login: String!, $firstName: String!, $lastName: String!, $password: String!, $dateOfBirth: String!, $phoneNumber: String!) {
+                updateUser(mail: $mail, login: $login, firstName: $firstName, lastName: $lastName, password: $password, dateOfBirth: $dateOfBirth, phoneNumber: $phoneNumber)
+                {
+                  mail
+                  login
+                  firstName
+                  lastName
+                  password
+                  dateOfBirth
+                  phoneNumber
+                }
+              }`,
+            {login: this.login.value,
+                mail: this.mail.value,
+                password: this.password.value,
+                firstName: this.firstName.value,
+                lastName: this.lastName.value,
+                dateOfBirth: this.dateOfBirth.value,
+                phoneNumber: this.phoneNumber.value}
+        )
+            .then(data => store.dispatch({type: 'ADD_USER', data: {user:data.createUser}}));
+
+        this.login.value = '';
+        this.mail.value = '';
+        this.password.value = '';
+        this.firstName.value = '';
+        this.lastName.value = '';
+        this.dateOfBirth.value = '';
+        this.phoneNumber.value = '';
+    }
+
+            
+
+    render() {
+        return (
+
+            <div className=" App-header App SectionApp">
+                <h1>Update User</h1><br /><br />
+                <input className="InputSpace" placeholder='Type your login'  type="text" ref={(input) => { this.login = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your mail'  type="text" ref={(input) => { this.mail = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your firstName'  type="text" ref={(input) => { this.firstName = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your lastName'  type="text" ref={(input) => { this.lastName = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your password'  type="text" ref={(input) => { this.password = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your dateOfBirth'  type="text" ref={(input) => { this.dateOfBirth = input }} /><br /><br />
+                <input className="InputSpace" placeholder='Type your phoneNumber'  type="text" ref={(input) => { this.phoneNumber = input }} /><br /><br />
+                <button onClick={this.updateUser.bind(this)}>Update user</button><br /><br />
                 <Link to='/' className='WhiteLink'>Home</Link>&nbsp;&nbsp;
             </div>
             
@@ -367,6 +415,7 @@ class App extends Component {
                             <Route exact path='/' component={Home}/>
                             <Route path='/login' component={Login}/>
                             <Route path='/registration' component={Registration}/>
+                            <Route path='/profile' component={Profile}/>
                             <Route path='/detail/:id' component={Detail}/>
                             <Route component={ErrPage}/>
                         </Switch>

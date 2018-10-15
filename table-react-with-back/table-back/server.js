@@ -139,7 +139,7 @@ var schema = buildSchema(`
     type Mutation {
         createUser(login: String!, mail: String!, password: String!, firstName: String!, lastName: String!, dateOfBirth: String!, phoneNumber: String!): User
         createTable(userId: Int!, name: String!, language: String!, genres: String!, status: String!, rating: String!): Table
-        updateUser(userId: Int!, mail: String!, login: String!, firstName: String!, lastName: String!, password: String!, dateOfBirth: String!, phoneNumber: String!): User
+        updateUser(mail: String!, login: String!, firstName: String!, lastName: String!, password: String!, dateOfBirth: String!, phoneNumber: String!): User
         updateTable(tableId: String!, userId: Int!, name: String!): Table
     }
     
@@ -184,7 +184,11 @@ async function updateUser(args){
     let password = args.password
     let dateOfBirth = args.dateOfBirth
     let phoneNumber = args.phoneNumber
-    var user = await User.findById(id)
+    var user = await User.findOne({
+        where: {
+            login: login
+        }
+    })
     if (user){
         user.update({firstName})
         user.update({lastName})
@@ -203,11 +207,8 @@ console.log("success");
 
 async function getUser(args){
     console.log('args ',args);
-    // let id = args.id
     let login = args.login
     let password = args.password
-    // console.log('id', id);
-    // var user = await User.findById(id)
     var user = await User.findOne({
         where: {
             login: login
@@ -215,7 +216,6 @@ async function getUser(args){
     })
     if (login === user.login && password === user.password){
         console.log("success");
-        // console.log('user => ',user);
         console.log('ul',user.login);
     }
     else{
@@ -225,24 +225,6 @@ async function getUser(args){
     }
     return user;
 }
-
-// function getUser(args){
-//     let id = args.id
-//     let user = User.findById(id)
-//     if (user){
-//         console.log("success");
-//         console.log(user);
-//     }
-//     else{
-//        console.log("error");
-//     }
-//     return user;
-// }
-
-// function getUser(args){
-//     let id = args.id
-//     return User.findById(id)
-// }
 
 
 async function createUser({login, mail, password, firstName, lastName, dateOfBirth, phoneNumber}){
@@ -254,7 +236,6 @@ async function createTable({userId, name, language, genres, status, rating}){
     let table = await Table.create({name, language, genres, status, rating})
     user.addTable(table)
     return table
-    // console.log(userId)
 }
 
 async function getUsers(args){
