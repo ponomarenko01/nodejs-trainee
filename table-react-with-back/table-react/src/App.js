@@ -218,8 +218,8 @@ class Home extends Component {
         return (
             <div className=" App-header App SectionApp">
                 <h1>Home Page</h1><br /><br />
-                <UserSearch /><br /><br />
-                <MakeTable /><br /><br />
+                <UserSearchCont /><br /><br />
+                <MakeTableCont /><br /><br />
                 <Link to='/login' className='WhiteLink'>User info</Link>
             </div>
         );
@@ -400,8 +400,8 @@ const mapStateToProps = function(store) {
     };
 };
 
-MakeTable = connect(mapStateToProps,{actionTable, action})(MakeTable);
-UserSearch = connect(mapStateToProps,{actionTable})(UserSearch);
+const MakeTableCont = connect(mapStateToProps,{actionTable, action})(MakeTable);
+const UserSearchCont = connect(mapStateToProps,{actionTable})(UserSearch);
 // Home = connect(mapStateToProps)(Home);
 // Login = connect(mapStateToProps)(Login);
 
