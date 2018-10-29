@@ -1,0 +1,40 @@
+<!-- <div class="ui main text container" *ngFor="let r of response">
+  <h1 class="ui header">{{ r.show.name }}</h1>
+  <p>{{ r.show.language }}</p>
+  {{ r.show.status }}
+  <hr>
+</div> -->
+
+
+<input type="text" (keyup)="onNameKeyUp($event)">
+<button (click)="getFile()">Get</button>
+<br><br>
+
+<table class="table table-hover">
+  <thead>
+      <tr>
+          <th>Name</th>
+          <th>Language</th>
+          <th>Genres</th>
+          <th>Status</th>
+          <th>Rating</th>
+      </tr>
+  </thead>
+  <tr class="ui main text container" *ngFor="let r of response">
+      <td>{{ r.show.name }}</td>
+      <td>{{ r.show.language }}</td>
+      <td>{{ r.show.genres }}</td>
+      <td>{{ r.show.status }}</td>
+      <td>{{ r.show.rating.average }}</td>
+  </tr>
+</table>
+
+<br />
+
+
+
+
+<!-- <p *ngFor='let arrs of arr; let i = index;'>
+  {{i+1}} {{message}} 
+  {{arrs}}
+</p> -->
